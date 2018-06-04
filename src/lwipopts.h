@@ -43,6 +43,9 @@
 #define DEFAULT_TCP_RECVMBOX_SIZE       40
 #define DEFAULT_ACCEPTMBOX_SIZE         4
 
+// Default implementation doesn't allocate enough MEMP_NUM_SYS_TIMEOUT for certain TCP functions (e.g. ones used by the default MQTT implementation)
+#define MEMP_NUM_SYS_TIMEOUT            10
+
 #if !defined(TCPIP_MBOX_SIZE)
 #define TCPIP_MBOX_SIZE                 MEMP_NUM_PBUF
 #endif

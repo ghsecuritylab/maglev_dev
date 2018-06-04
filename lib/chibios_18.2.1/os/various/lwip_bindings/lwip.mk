@@ -10,7 +10,7 @@ LWBINDSRC = \
 
 
 # Add blocks of files from Filelists.mk as required for enabled options
-LWSRC = $(COREFILES) $(CORE4FILES) $(APIFILES) $(LWBINDSRC) $(NETIFFILES) $(HTTPDFILES)
+LWSRC = $(COREFILES) $(CORE4FILES) $(APIFILES) $(LWBINDSRC) $(NETIFFILES) $(HTTPDFILES) $(MQTTFILES)
 
 LWINC = \
         $(CHIBIOS)/os/various/lwip_bindings \

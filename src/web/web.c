@@ -34,6 +34,8 @@
 
 #include "web.h"
 
+// #include "cn-cbor/cn-cbor.h"
+
 #if LWIP_NETCONN
 
 static const char http_html_hdr[] = "HTTP/1.1 200 OK\r\nContent-type: text/html\r\n\r\n";
@@ -66,7 +68,7 @@ static void http_server_serve(struct netconn *conn) {
              * NETCONN_NOCOPY: our data is const static, so no need to copy it
        */
       netconn_write(conn, http_html_hdr, sizeof(http_html_hdr)-1, NETCONN_NOCOPY);
-
+      
       /* Send our HTML page */
       netconn_write(conn, http_index_html, sizeof(http_index_html)-1, NETCONN_NOCOPY);
     }

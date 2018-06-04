@@ -23,6 +23,8 @@
 
 #include "web/web.h"
 
+#include "lwip/apps/mqtt.h"
+
 /*
  * This is a periodic thread that does absolutely nothing except flashing
  * a LED.
@@ -45,6 +47,36 @@ static THD_FUNCTION(Thread1, arg) {
     chThdSleepMilliseconds(50);
     palClearLine(LINE_LED3);
     chThdSleepMilliseconds(200);
+  }
+}
+
+
+volatile mqtt_connection_status_t mqtt_status = MQTT_CONNECT_DISCONNECTED;
+void mqtt_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status) {
+  mqtt_status = status;
+}
+
+static THD_WORKING_AREA(waMQTT, 2048);
+static THD_FUNCTION(MQTT, arg) {
+  
+  mqtt_client_t client;
+  ip_addr_t broker_addr = IPADDR4_INIT_BYTES(192, 168, 1, 1);
+  u16_t broker_port = 1883;
+  
+  struct mqtt_connect_client_info_t client_info = { .client_id = "mqtt_client_ex", .client_user = NULL, .client_pass = NULL, .keep_alive = 0, .will_topic = NULL };
+  
+  chThdSleepMilliseconds(2000);
+  err_t err;
+  
+  while((err = mqtt_client_connect(&client, &broker_addr, broker_port, &mqtt_cb, NULL, &client_info)) != ERR_OK)
+    chThdSleepMilliseconds(2000);
+  
+  while(mqtt_status != MQTT_CONNECT_ACCEPTED)
+    chThdSleepMilliseconds(2000);
+  
+  while(true) {
+    err = mqtt_publish(&client, "/test", "hello 123", 10, 0, 0, NULL, NULL);
+    chThdSleepMilliseconds(2000);
   }
 }
 
@@ -79,6 +111,12 @@ int main(void) {
    */
   chThdCreateStatic(wa_http_server, sizeof(wa_http_server), NORMALPRIO + 1,
                     http_server, NULL);
+  
+  /*
+   * Creates the MQTT publish thread.
+   */
+  chThdCreateStatic(waMQTT, sizeof(waMQTT), NORMALPRIO + 1,
+                    MQTT, NULL);
 
   /*
    * Normal main() thread activity, in this demo it does nothing except
