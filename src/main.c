@@ -24,6 +24,8 @@
 #include "web/web.h"
 
 #include "lwip/apps/mqtt.h"
+#include "util.h"
+#include <string.h>
 
 /*
  * This is a periodic thread that does absolutely nothing except flashing
@@ -35,17 +37,6 @@ static THD_FUNCTION(Thread1, arg) {
   (void)arg;
   chRegSetThreadName("blinker");
   while (true) {
-    palSetLine(LINE_LED1);
-    chThdSleepMilliseconds(50);
-    palSetLine(LINE_LED2);
-    chThdSleepMilliseconds(50);
-    palSetLine(LINE_LED3);
-    chThdSleepMilliseconds(200);
-    palClearLine(LINE_LED1);
-    chThdSleepMilliseconds(50);
-    palClearLine(LINE_LED2);
-    chThdSleepMilliseconds(50);
-    palClearLine(LINE_LED3);
     chThdSleepMilliseconds(200);
   }
 }
@@ -75,7 +66,7 @@ static THD_FUNCTION(MQTT, arg) {
     chThdSleepMilliseconds(2000);
   
   while(true) {
-    err = mqtt_publish(&client, "/test", "hello 123", 10, 0, 0, NULL, NULL);
+    err = mqtt_publish(&client, "/test", uniqueID(), strlen(uniqueID()), 0, 0, NULL, NULL);
     chThdSleepMilliseconds(2000);
   }
 }
@@ -123,10 +114,6 @@ int main(void) {
    * sleeping in a loop and check the button state.
    */
   while (true) {
-    if (palReadLine(LINE_BUTTON)) {
-      test_execute((BaseSequentialStream *)&SD3, &rt_test_suite);
-      test_execute((BaseSequentialStream *)&SD3, &oslib_test_suite);
-    }
     chThdSleepMilliseconds(500);
   }
 }
