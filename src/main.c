@@ -23,6 +23,7 @@
 
 #include "web/web.h"
 #include "motor_control.h"
+#include "93AA46AE48.h"
 
 #include "lwip/apps/mqtt.h"
 #include "util.h"
@@ -98,6 +99,16 @@ static void pwm_cb(PWMDriver *pwmp)  {
     MotorControlCb(&m2);
 }
 
+static const mc_93aa46ae48_t mc_93aa46ae48 = { .cs = LINE_SPI3_CS,
+                                               .sck = LINE_SPI3_SCK,
+                                               .miso = LINE_SPI3_MISO,
+                                               .mosi = LINE_SPI3_MOSI };
+static uint8_t _macaddress[6];
+static const struct lwipthread_opts _lwip_opts = { .address = IP4_ADDR_VALUE(192, 168, 1, 10),
+                                                   .gateway = IP4_ADDR_VALUE(192, 168, 1, 1),
+                                                   .netmask = IP4_ADDR_VALUE(255, 255, 255, 0),
+                                                   .addrMode = NET_ADDRESS_STATIC,
+                                                   .macaddress = _macaddress };
 
 /*
  * Application entry point.
@@ -113,7 +124,11 @@ int main(void) {
    */
   halInit();
   chSysInit();
-  lwipInit(NULL);
+  
+  // Read the external memory to get a MAC address before initializing LWIP
+  Mc94AA46AE58Init(&mc_93aa46ae48);
+  Mc94AA46AE58GetID(&mc_93aa46ae48, _macaddress);
+  lwipInit(&_lwip_opts);
 
   /*
    * Set up the motor controllers

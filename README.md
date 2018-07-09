@@ -25,4 +25,5 @@ GDB shortcuts: http://users.ece.utexas.edu/~adnan/gdb-refcard.pdf
 
 ```
 $ hbmqtt
+$ hbmqtt_sub --url mqtt://localhost -t /test
 ```

@@ -117,6 +117,7 @@ LDSCRIPT= $(STARTUPLD)/STM32F429xI.ld
 CSRC = $(ALLCSRC) \
        $(TESTSRC) \
        $(CHIBIOS)/os/various/evtimer.c \
+       93AA46AE48.c \
        main.c \
        motor_control.c \
        util.c \

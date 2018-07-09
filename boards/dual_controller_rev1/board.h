@@ -239,7 +239,7 @@
                                      PIN_PUPDR_FLOATING(GPIOA_SWDIO) |      \
                                      PIN_PUPDR_FLOATING(GPIOA_SWCLK) |      \
                                      PIN_PUPDR_PULLUP(GPIOA_SPI3_CS))
-#define VAL_GPIOA_ODR               (PIN_ODR_HIGH(GPIOA_SPI3_CS))
+#define VAL_GPIOA_ODR               (PIN_ODR_LOW(GPIOA_SPI3_CS))
 #define VAL_GPIOA_AFRL              (PIN_AFIO_AF(GPIOA_RMII_REF_CLK, 11U) | \
                                      PIN_AFIO_AF(GPIOA_RMII_MDIO, 11U) |    \
                                      PIN_AFIO_AF(GPIOA_TIM8_BKIN1, 3U) |    \
@@ -273,9 +273,9 @@
                                      PIN_MODE_ALTERNATE(GPIOC_TIM8_CH1) |   \
                                      PIN_MODE_ALTERNATE(GPIOC_TIM8_CH2) |   \
                                      PIN_MODE_ALTERNATE(GPIOC_TIM8_CH3) |   \
-                                     PIN_MODE_INPUT(GPIOC_SPI3_SCK) |       \
+                                     PIN_MODE_OUTPUT(GPIOC_SPI3_SCK) |      \
                                      PIN_MODE_INPUT(GPIOC_SPI3_MISO) |      \
-                                     PIN_MODE_INPUT(GPIOC_SPI3_MOSI))
+                                     PIN_MODE_OUTPUT(GPIOC_SPI3_MOSI))
 #define VAL_GPIOC_OTYPER            (PIN_OTYPE_PUSHPULL(GPIOC_RMII_MDC) |   \
                                      PIN_OTYPE_PUSHPULL(GPIOC_TIM8_CH1) |   \
                                      PIN_OTYPE_PUSHPULL(GPIOC_TIM8_CH2) |   \
