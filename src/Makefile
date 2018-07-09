@@ -118,6 +118,7 @@ CSRC = $(ALLCSRC) \
        $(TESTSRC) \
        $(CHIBIOS)/os/various/evtimer.c \
        main.c \
+       motor_control.c \
        util.c \
        web/web.c
 
