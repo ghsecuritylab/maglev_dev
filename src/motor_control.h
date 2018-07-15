@@ -2,11 +2,22 @@
 
 #include "ch.h"
 #include "hal.h"
+#include "biquad.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+  
+  typedef struct {
+    float alpha;
+    float beta;
+  } alphabeta_t;
+  
+  typedef struct {
+    float d;
+    float q;
+  } dq_t;
   
   typedef struct {
     bool enabled;
@@ -16,8 +27,12 @@ extern "C" {
     float i_a;
     float i_b;
     
+    biquad_t iq_compensator;
+    biquad_t id_compensator;
+    
     uint32_t pwm_freq;
     uint32_t clock_freq;
+    int32_t max_duty_count;
     PWMDriver* driver;
     ioline_t nfault;
     ioline_t fault_clear;
@@ -27,9 +42,9 @@ extern "C" {
     ADCDriver* adc;
   } motor_control_t;
   
-  void MotorControlInit(volatile motor_control_t *m,
+  void MotorControlInit(motor_control_t *m,
                         pwmcallback_t cb);
-  void MotorControlCb(volatile motor_control_t* m,
+  void MotorControlCb(motor_control_t* m,
                       float i_a,
                       float i_b);
   

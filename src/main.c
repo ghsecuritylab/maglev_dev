@@ -77,20 +77,20 @@ static THD_FUNCTION(MQTT, arg) {
   }
 }
 
-static volatile motor_control_t m1 = { .driver = &PWMD1,
-                                       .clock_freq = STM32_TIMCLK2,
-                                       .pwm_freq = 35e3,
-                                       .nfault = LINE_TIM1_BKIN1,
-                                       .fault_clear = LINE_GPIOG_PIN1,
-                                       .bridge_enabled = LINE_GPIOG_PIN0
-                                      };
-static volatile motor_control_t m2 = { .driver = &PWMD8,
-                                       .clock_freq = STM32_TIMCLK2,
-                                       .pwm_freq = 35e3,
-                                       .nfault = LINE_TIM8_BKIN1,
-                                       .fault_clear = LINE_GPIOF_PIN12,
-                                       .bridge_enabled = LINE_GPIOF_PIN11
-                                     };
+static motor_control_t m1 = { .driver = &PWMD1,
+                              .clock_freq = STM32_TIMCLK2,
+                              .pwm_freq = 35e3,
+                              .nfault = LINE_TIM1_BKIN1,
+                              .fault_clear = LINE_GPIOG_PIN1,
+                              .bridge_enabled = LINE_GPIOG_PIN0
+                             };
+static motor_control_t m2 = { .driver = &PWMD8,
+                              .clock_freq = STM32_TIMCLK2,
+                              .pwm_freq = 35e3,
+                              .nfault = LINE_TIM8_BKIN1,
+                              .fault_clear = LINE_GPIOF_PIN12,
+                              .bridge_enabled = LINE_GPIOF_PIN11
+                            };
 
 const float i_scale = (3.f / 4095.f) / 20.f / 0.001f;
 
@@ -117,6 +117,7 @@ static void configure_motor_adcs(void) {
   rccEnableADC1(true);
   rccEnableADC2(true);
   
+  // Configure the ADC
   ADC1->SMPR2 = (0b010 << 9) | (0b010 << 12);
   ADC1->JSQR = (0b01 << 20) | (3 << 10) | (4 << 15);
   ADC1->CR1 = ADC_CR1_SCAN;
