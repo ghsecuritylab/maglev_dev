@@ -92,11 +92,14 @@ static volatile motor_control_t m2 = { .driver = &PWMD8,
                                        .bridge_enabled = LINE_GPIOF_PIN11
                                      };
 
+const float i_scale = (3.f / 4095.f) / 20.f / 0.001f;
+
 static void pwm_cb(PWMDriver *pwmp)  {
   if(pwmp == &PWMD1)
-    MotorControlCb(&m1);
+    MotorControlCb(&m1, ((int16_t)ADC1->JDR1) * i_scale,
+                        ((int16_t)ADC1->JDR2) * i_scale);
   else if(pwmp == &PWMD8)
-    MotorControlCb(&m2);
+    MotorControlCb(&m2, ADC2->JDR1, ADC2->JDR2);
 }
 
 static const mc_93aa46ae48_t mc_93aa46ae48 = { .cs = LINE_SPI3_CS,
@@ -109,6 +112,21 @@ static const struct lwipthread_opts _lwip_opts = { .address = IP4_ADDR_VALUE(192
                                                    .netmask = IP4_ADDR_VALUE(255, 255, 255, 0),
                                                    .addrMode = NET_ADDRESS_STATIC,
                                                    .macaddress = _macaddress };
+
+static void configure_motor_adcs(void) {
+  rccEnableADC1(true);
+  rccEnableADC2(true);
+  
+  ADC1->SMPR2 = (0b010 << 9) | (0b010 << 12);
+  ADC1->JSQR = (0b01 << 20) | (3 << 10) | (4 << 15);
+  ADC1->CR1 = ADC_CR1_SCAN;
+  ADC1->CR2 = ADC_CR2_ADON |
+              ADC_CR2_JEXTEN_1;
+  ADC1->JOFR1 = ADC1->JOFR2 = 0x7FF;
+  
+  // Trigger one sample capture, so the first MC interrupt has data
+  ADC1->CR2 |= ADC_CR2_JSWSTART;
+}
 
 /*
  * Application entry point.
@@ -133,8 +151,8 @@ int main(void) {
   /*
    * Set up the motor controllers
    */
+  configure_motor_adcs();
   MotorControlInit(&m1, pwm_cb);
-  
   
   /*
    * Activates the serial driver 3 using the driver default configuration.
