@@ -45,13 +45,18 @@ static motor_control_t m2 = { .driver = &PWMD8,
 
 const float i_scale = (3.f / 4095.f) / 20.f / 0.001f;
 
-static void pwm_cb(PWMDriver *pwmp)  {
-  if(pwmp == &PWMD1)
-    MotorControlCb(&m1, ((int16_t)ADC1->JDR1) * i_scale,
-                        ((int16_t)ADC1->JDR2) * i_scale);
-  else if(pwmp == &PWMD8)
-    MotorControlCb(&m2, ADC2->JDR1, ADC2->JDR2);
+static void m1_pwm_cb(PWMDriver *pwmp)  {
+  (void)pwmp;
+  MotorControlCb(&m1, ((int16_t)ADC1->JDR1) * i_scale,
+                      ((int16_t)ADC1->JDR2) * i_scale);
 }
+
+static void m2_pwm_cb(PWMDriver *pwmp)  {
+  (void)pwmp;
+  MotorControlCb(&m2, ((int16_t)ADC2->JDR1) * i_scale,
+                      ((int16_t)ADC2->JDR2) * i_scale);
+}
+
 
 static const mc_93aa46ae48_t mc_93aa46ae48 = { .cs = LINE_SPI3_CS,
                                                .sck = LINE_SPI3_SCK,
@@ -142,7 +147,8 @@ int main(void) {
 
   // Set up the motor controllers
   configure_motor_adcs();
-  MotorControlInit(&m1, pwm_cb);
+  MotorControlInit(&m1, m1_pwm_cb);
+  MotorControlInit(&m2, m2_pwm_cb);
   
   // Set up comms
   CommsInit(&_comms);
