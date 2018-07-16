@@ -28,8 +28,6 @@
 #include "util.h"
 #include <string.h>
 
-static comms_t _comms;
-
 static motor_control_t m1 = { .driver = &PWMD1,
                               .clock_freq = STM32_TIMCLK2,
                               .pwm_freq = 35e3,
@@ -81,6 +79,46 @@ static void configure_motor_adcs(void) {
   // Trigger one sample capture, so the first MC interrupt has data
   ADC1->CR2 |= ADC_CR2_JSWSTART;
 }
+
+static void handle_incoming_command(comms_t* c,
+                                    enum incoming_publish_type inpub_type,
+                                    cw_unpack_context* uc)
+{
+  (void)c;
+  motor_control_t* mc = NULL;
+  if(inpub_type == INPUB_CMD_M1)
+    mc = &m1;
+  else if(inpub_type == INPUB_CMD_M2)
+    mc = &m2;
+  else
+    return;
+
+  cw_unpack_next(uc);
+  if (uc->item.type != CWP_ITEM_MAP)
+    return;
+  
+  int num_items = uc->item.as.map.size;
+  int i;
+  for(i = 0; i < num_items; i++) {
+    cw_unpack_next(uc);
+    if (uc->item.type != CWP_ITEM_STR)
+      return;
+    
+    const char* key = uc->item.as.str.start;
+    
+    cw_unpack_next(uc);
+    if(strncmp(key, "enable", uc->item.as.str.length) == 0) {
+      if(uc->item.type == CWP_ITEM_BOOLEAN)
+        mc->enabled = uc->item.as.boolean;
+    }
+    if(strncmp(key, "i_target", uc->item.as.str.length) == 0) {
+      if(uc->item.type == CWP_ITEM_FLOAT)
+        mc->i_target = uc->item.as.real;
+    }
+  }
+}
+
+static comms_t _comms = { .inpub_cb = handle_incoming_command };
 
 /*
  * Application entry point.
