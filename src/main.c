@@ -73,16 +73,27 @@ static void configure_motor_adcs(void) {
   rccEnableADC1(true);
   rccEnableADC2(true);
   
+  /// M1
   // Configure the ADC
   ADC1->SMPR2 = (0b010 << 9) | (0b010 << 12);
   ADC1->JSQR = (0b01 << 20) | (3 << 10) | (4 << 15);
   ADC1->CR1 = ADC_CR1_SCAN;
-  ADC1->CR2 = ADC_CR2_ADON |
-              ADC_CR2_JEXTEN_1;
+  ADC1->CR2 = ADC_CR2_ADON | ADC_CR2_JEXTEN_1;
   ADC1->JOFR1 = ADC1->JOFR2 = 0x7FF;
   
   // Trigger one sample capture, so the first MC interrupt has data
   ADC1->CR2 |= ADC_CR2_JSWSTART;
+  
+  /// M2
+  // Configure the ADC
+  ADC2->SMPR2 = (0b010 << 9) | (0b010 << 12);
+  ADC2->JSQR = (0b01 << 20) | (8 << 10) | (9 << 15);
+  ADC2->CR1 = ADC_CR1_SCAN;
+  ADC2->CR2 = ADC_CR2_ADON | ADC_CR2_JEXTEN_1;
+  ADC2->JOFR1 = ADC1->JOFR2 = 0x7FF;
+  
+  // Trigger one sample capture, so the first MC interrupt has data
+  ADC2->CR2 |= ADC_CR2_JSWSTART;
 }
 
 static void handle_incoming_command(comms_t* c,
