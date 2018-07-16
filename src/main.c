@@ -21,61 +21,14 @@
 
 #include "lwipthread.h"
 
-#include "web/web.h"
+#include "comms.h"
 #include "motor_control.h"
 #include "93AA46AE48.h"
 
-#include "lwip/apps/mqtt.h"
 #include "util.h"
 #include <string.h>
 
-/*
- * This is a periodic thread that does absolutely nothing except flashing
- * a LED.
- */
-static THD_WORKING_AREA(waThread1, 128);
-static THD_FUNCTION(Thread1, arg) {
-
-  (void)arg;
-  chRegSetThreadName("blinker");
-  while (true) {
-    chThdSleepMilliseconds(200);
-  }
-}
-
-
-volatile mqtt_connection_status_t mqtt_status = MQTT_CONNECT_DISCONNECTED;
-volatile bool mqtt_response_received = false;
-void mqtt_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status) {
-  mqtt_status = status;
-  mqtt_response_received = true;
-}
-
-static THD_WORKING_AREA(waMQTT, 2048);
-static THD_FUNCTION(MQTT, arg) {
-  
-  mqtt_client_t client;
-  ip_addr_t broker_addr = IPADDR4_INIT_BYTES(192, 168, 1, 1);
-  u16_t broker_port = 1883;
-  err_t err;
-  
-  do {
-    mqtt_response_received = false;
-    chThdSleepMilliseconds(2000);
-    
-    static struct mqtt_connect_client_info_t client_info = { .client_id = "mqtt_client_ex", .client_user = NULL, .client_pass = NULL, .keep_alive = 0, .will_topic = NULL };
-    while((err = mqtt_client_connect(&client, &broker_addr, broker_port, &mqtt_cb, NULL, &client_info)) != ERR_OK)
-      chThdSleepMilliseconds(2000);
-    
-    while(!mqtt_response_received)
-      chThdSleepMilliseconds(100);
-  } while(mqtt_status != MQTT_CONNECT_ACCEPTED);
-  
-  while(true) {
-    err = mqtt_publish(&client, "/test", uniqueID(), strlen(uniqueID()), 0, 0, NULL, NULL);
-    chThdSleepMilliseconds(2000);
-  }
-}
+static comms_t _comms;
 
 static motor_control_t m1 = { .driver = &PWMD1,
                               .clock_freq = STM32_TIMCLK2,
@@ -149,40 +102,19 @@ int main(void) {
   Mc94AA46AE58GetID(&mc_93aa46ae48, _macaddress);
   lwipInit(&_lwip_opts);
 
-  /*
-   * Set up the motor controllers
-   */
+  // Set up the motor controllers
   configure_motor_adcs();
   MotorControlInit(&m1, pwm_cb);
   
-  /*
-   * Activates the serial driver 3 using the driver default configuration.
-   */
-  // sdStart(&SD3, NULL);
+  // Set up comms
+  CommsInit(&_comms);
   
-
-  /*
-   * Creates the example thread.
-   */
-  chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO + 1, Thread1, NULL);
+  // Shut down the thread
+  chThdExit(0);
   
-  /*
-   * Creates the HTTP thread (it changes priority internally).
-   */
-  chThdCreateStatic(wa_http_server, sizeof(wa_http_server), NORMALPRIO + 1,
-                    http_server, NULL);
-  
-  /*
-   * Creates the MQTT publish thread.
-   */
-  chThdCreateStatic(waMQTT, sizeof(waMQTT), NORMALPRIO + 1,
-                    MQTT, NULL);
-
-  /*
-   * Normal main() thread activity, in this demo it does nothing except
-   * sleeping in a loop and check the button state.
-   */
-  while (true) {
-    chThdSleepMilliseconds(500);
-  }
+  return -1;
+  // Main thread (in this case, just loop)
+  // while (true) {
+  //   chThdSleepMilliseconds(500);
+  // }
 }

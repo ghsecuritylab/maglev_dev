@@ -65,8 +65,6 @@ void MotorControlCb(motor_control_t* m,
     m->error_count++;
   ADC1->SR = 0;
   
-  theta_counter++;
-  
   const float sin_theta = sinf(theta_counter / 10000.f);
   const float cos_theta = cosf(theta_counter / 10000.f);
   
@@ -84,10 +82,10 @@ void MotorControlCb(motor_control_t* m,
     
     // Transform back to abc space
     const alphabeta_t vab = inv_park(vdq, sin_theta, cos_theta);
-    const float va = vab.alpha;
-    const float vb = (-vab.alpha + sqrt3 * vab.beta) * 0.5f;
-    const float vc = (-vab.alpha - sqrt3 * vab.beta) * 0.5f;
-    const float min_v = MIN(MIN(va, vb), vc);
+    const int16_t va = vab.alpha;
+    const int16_t vb = (-vab.alpha + sqrt3 * vab.beta) * 0.5f;
+    const int16_t vc = (-vab.alpha - sqrt3 * vab.beta) * 0.5f;
+    const int16_t min_v = MIN(MIN(va, vb), vc);
     
     // Configure PWM channel
     m->driver->tim->CCR[0] = va - min_v;

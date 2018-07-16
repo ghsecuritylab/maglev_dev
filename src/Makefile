@@ -117,12 +117,13 @@ LDSCRIPT= $(STARTUPLD)/STM32F429xI.ld
 CSRC = $(ALLCSRC) \
        $(TESTSRC) \
        $(CHIBIOS)/os/various/evtimer.c \
+       comms.c \
+       cwpack/cwpack.c \
        93AA46AE48.c \
        biquad.c \
        main.c \
        motor_control.c \
-       util.c \
-       web/web.c
+       util.c
 
 #      $(CHIBIOS)/os/various/syscalls.c
 
