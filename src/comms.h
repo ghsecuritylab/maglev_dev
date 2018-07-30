@@ -18,9 +18,11 @@ enum incoming_publish_type {
 };
 
 typedef void (*inpub_handler)(comms_t*, enum incoming_publish_type, cw_unpack_context*);
+typedef systime_t (*outpub_handler)(comms_t*, cw_pack_context*);
 
 struct comms_s {
   inpub_handler inpub_cb;
+  outpub_handler telem_cb;
   
   mqtt_connection_status_t connection_status;
   bool connection_response_received;

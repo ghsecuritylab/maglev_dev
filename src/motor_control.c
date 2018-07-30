@@ -110,4 +110,7 @@ void MotorControlCb(motor_control_t* m,
   
   m->i_a = i_a;
   m->i_b = i_b;
+  
+  m->i_d = i_dq.d;
+  m->i_q = i_dq.q;
 }

@@ -134,7 +134,28 @@ static void handle_incoming_command(comms_t* c,
   }
 }
 
-static comms_t _comms = { .inpub_cb = handle_incoming_command };
+static systime_t dispatch_telemetry(comms_t* c,
+                                    cw_pack_context* pc)
+{
+  (void)c;
+  
+  cw_pack_map_size(pc, 4);
+  
+  cw_pack_str(pc, "i_a", 3);
+  cw_pack_float(pc, m1.i_a);
+  cw_pack_str(pc, "i_b", 3);
+  cw_pack_float(pc, m1.i_b);
+  
+  cw_pack_str(pc, "i_d", 3);
+  cw_pack_float(pc, m1.i_d);
+  cw_pack_str(pc, "i_q", 3);
+  cw_pack_float(pc, m1.i_q);
+  
+  return TIME_MS2I(20);
+}
+
+static comms_t _comms = { .inpub_cb = handle_incoming_command,
+                          .telem_cb = dispatch_telemetry };
 
 /*
  * Application entry point.

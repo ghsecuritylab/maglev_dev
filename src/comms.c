@@ -111,12 +111,25 @@ static THD_FUNCTION(_CommTask, arg) {
     mqtt_set_inpub_callback(&c->client, mqtt_pub_cb, mqtt_data_cb, c);
     mqtt_subscribe(&c->client, c->m1_cmd_topic, 0, 0, c);
     
-    systime_t time = chVTGetSystemTime();
+    systime_t next_outpub = chVTGetSystemTime();
     while(c->connection_status == MQTT_CONNECT_ACCEPTED) {
+      systime_t time_now = chVTGetSystemTime();
+      
+      if((c->telem_cb) && (time_now > next_outpub)) {
+        cw_pack_context pc;
+        cw_pack_context_init(&pc, c->pub_buffer, sizeof(c->pub_buffer), 0);
+        
+        const systime_t delay = c->telem_cb(c, &pc);
+        
+        const int length = pc.current - pc.start;
+        err = mqtt_publish(&c->client, c->m1_telem_topic, pc.start, length, 0, 0, NULL, NULL);
+        
+        next_outpub = time_now + delay;
+      }
+      
       heartbeat(c, heartbeat_topic);
       
-      time += TIME_MS2I(20);
-      chThdSleepUntil(time);
+      chThdSleep(TIME_MS2I(1));
     }
   }
 }

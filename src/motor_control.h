@@ -27,6 +27,9 @@ extern "C" {
     float i_a;
     float i_b;
     
+    float i_d;
+    float i_q;
+    
     biquad_t iq_compensator;
     biquad_t id_compensator;
     
