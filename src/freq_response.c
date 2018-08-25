@@ -12,10 +12,10 @@ void FreqResponse_Poll(freq_response_t* fr) {
     if(fr->f >= fr->f_min) {
       if(fr->emit) {
         const freq_response_result_t result = { .freq = fr->f,
-                                                .real = fr->sin_sum,
-                                                .imag = fr->cos_sum,
-                                                .exc_real = fr->sin_exc_sum,
-                                                .exc_imag = fr->cos_exc_sum };
+                                                .real = fr->sin_sum * fr->normalization_factor,
+                                                .imag = fr->cos_sum * fr->normalization_factor,
+                                                .exc_real = fr->sin_exc_sum * fr->normalization_factor,
+                                                .exc_imag = fr->cos_exc_sum * fr->normalization_factor };
         fr->emit(fr, &result);
       }
     }
@@ -34,7 +34,9 @@ void FreqResponse_Poll(freq_response_t* fr) {
     fr->sin_exc_sum = 0.f;
     fr->cos_exc_sum = 0.f;
     
-    fr->samples_remaining = (int)((fr->fs / fr->f) * fr->wavelengths_per_frequency);
+    const int samples_remaining = (int)((fr->fs / fr->f) * fr->wavelengths_per_frequency);
+    fr->normalization_factor = 2.f / samples_remaining;
+    fr->samples_remaining = samples_remaining;
   }
 }
 

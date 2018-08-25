@@ -71,8 +71,11 @@ static THD_FUNCTION(_MCTask, arg) {
 void MotorControlInit(motor_control_t *m, pwmcallback_t cb) {
   
   // Configure biquads
-  BiquadInit(&m->iq_compensator, 0.012169901f, 0.0015820871f, -0.010587814f, -1.76f, 0.76f);
-  BiquadInit(&m->id_compensator, 0.012169901f, 0.0015820871f, -0.010587814f, -1.76f, 0.76f);
+  // Poles at 0.4 and 1.0
+  // Zeros at 0.93 and -1.0
+  // Gain 26 at 1kHz (35kHz switching frequency)
+  BiquadInit(&m->iq_compensator, 7.6605727f, 0.53624009f, -7.1243326f, -1.4f, 0.4f);
+  BiquadInit(&m->id_compensator, 7.6605727f, 0.53624009f, -7.1243326f, -1.4f, 0.4f);
   
   // Set up a task to configure and poll the loop gain measurement
   chThdCreateStatic(mcTask, sizeof(mcTask), LOWPRIO, _MCTask, NULL);
@@ -111,8 +114,8 @@ void MotorControlCb(motor_control_t* m,
   const dq_t i_dq = park(i_ab, sin_theta, cos_theta);
   
   const float id_error = 0.f - i_dq.d;
-  // const float iq_error = m->i_target - i_dq.q;
-  const float iq_error = m->i_target - FreqResponse_Update(&iq_freq, i_dq.q);
+  const float iq_error = m->i_target - i_dq.q;
+  // const float iq_error = m->i_target - FreqResponse_Update(&iq_freq, i_dq.q);
   
   if(m->enabled) {
     // Iterate the compensator

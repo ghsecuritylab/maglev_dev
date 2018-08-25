@@ -28,6 +28,7 @@ struct freq_response {
   
   float f;
   float theta, theta_increment;
+  float normalization_factor;
   int samples_remaining;
   
   float sin_sum, cos_sum;
