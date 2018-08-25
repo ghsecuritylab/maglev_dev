@@ -22,18 +22,24 @@
 #include "lwipthread.h"
 
 #include "comms.h"
+#include "hall_sensors.h"
 #include "motor_control.h"
 #include "93AA46AE48.h"
 
 #include "util.h"
 #include <string.h>
 
+static hall_sensors_t h1 = { .a = LINE_TIM4_CH3,
+                             .b = LINE_TIM4_CH2,
+                             .c = LINE_TIM4_CH1 };
+
 static motor_control_t m1 = { .driver = &PWMD1,
                               .clock_freq = STM32_TIMCLK2,
                               .pwm_freq = 35e3,
                               .nfault = LINE_TIM1_BKIN1,
                               .fault_clear = LINE_GPIOG_PIN1,
-                              .bridge_enabled = LINE_GPIOG_PIN0
+                              .bridge_enabled = LINE_GPIOG_PIN0,
+                              .hall_sensors = &h1
                              };
 static motor_control_t m2 = { .driver = &PWMD8,
                               .clock_freq = STM32_TIMCLK2,

@@ -122,6 +122,7 @@ CSRC = $(ALLCSRC) \
        93AA46AE48.c \
        biquad.c \
        freq_response.c \
+       hall_sensors.c \
        main.c \
        motor_control.c \
        util.c

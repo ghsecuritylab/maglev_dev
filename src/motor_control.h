@@ -3,7 +3,7 @@
 #include "ch.h"
 #include "hal.h"
 #include "biquad.h"
-
+#include "hall_sensors.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,6 +45,7 @@ extern "C" {
     PWMConfig config;
     
     ADCDriver* adc;
+    hall_sensors_t* hall_sensors;
   } motor_control_t;
   
   void MotorControlInit(motor_control_t *m,

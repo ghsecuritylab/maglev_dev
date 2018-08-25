@@ -80,6 +80,9 @@ void MotorControlInit(motor_control_t *m, pwmcallback_t cb) {
   // Set up a task to configure and poll the loop gain measurement
   chThdCreateStatic(mcTask, sizeof(mcTask), LOWPRIO, _MCTask, NULL);
   
+  // Initialize the hall sensors
+  HallSensorsInit(m->hall_sensors);
+  
   // Initialize config
   m->config.frequency = m->clock_freq;
   m->config.period = (m->clock_freq / m->pwm_freq);
@@ -106,7 +109,8 @@ void MotorControlCb(motor_control_t* m,
     m->error_count++;
   ADC1->SR = 0;
   
-  const float theta = 0.f;
+  // const float theta = 0.f;
+  const float theta = HallSensorsGetAngle(m->hall_sensors);
   const float sin_theta = sinf(theta);
   const float cos_theta = cosf(theta);
   
@@ -119,7 +123,6 @@ void MotorControlCb(motor_control_t* m,
   
   if(m->enabled) {
     // Iterate the compensator
-    m->max_duty_count = 300;
     const dq_t vdq = { .d = BiquadUpdateLim(&m->id_compensator, id_error, -m->max_duty_count, m->max_duty_count),
                        .q = BiquadUpdateLim(&m->iq_compensator, iq_error, -m->max_duty_count, m->max_duty_count) };
     
