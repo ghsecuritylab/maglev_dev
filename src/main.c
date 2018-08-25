@@ -139,7 +139,7 @@ static systime_t dispatch_telemetry(comms_t* c,
 {
   (void)c;
   
-  cw_pack_map_size(pc, 4);
+  cw_pack_map_size(pc, 7);
   
   cw_pack_str(pc, "i_a", 3);
   cw_pack_float(pc, m1.i_a);
@@ -150,6 +150,13 @@ static systime_t dispatch_telemetry(comms_t* c,
   cw_pack_float(pc, m1.i_d);
   cw_pack_str(pc, "i_q", 3);
   cw_pack_float(pc, m1.i_q);
+  
+  cw_pack_str(pc, "theta", 5);
+  cw_pack_float(pc, m1.theta);
+  cw_pack_str(pc, "sin_theta", 9);
+  cw_pack_float(pc, m1.sin_theta);
+  cw_pack_str(pc, "cos_theta", 9);
+  cw_pack_float(pc, m1.cos_theta);
   
   return TIME_MS2I(20);
 }
@@ -180,7 +187,7 @@ int main(void) {
   // Set up the motor controllers
   configure_motor_adcs();
   MotorControlInit(&m1, m1_pwm_cb);
-  MotorControlInit(&m2, m2_pwm_cb);
+  // MotorControlInit(&m2, m2_pwm_cb);
   
   // Set up comms
   CommsInit(&_comms);

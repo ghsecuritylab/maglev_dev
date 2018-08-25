@@ -121,6 +121,7 @@ CSRC = $(ALLCSRC) \
        cwpack/cwpack.c \
        93AA46AE48.c \
        biquad.c \
+       freq_response.c \
        main.c \
        motor_control.c \
        util.c

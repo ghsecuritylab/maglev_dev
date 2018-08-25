@@ -30,6 +30,8 @@ extern "C" {
     float i_d;
     float i_q;
     
+    float theta, sin_theta, cos_theta;
+    
     biquad_t iq_compensator;
     biquad_t id_compensator;
     
