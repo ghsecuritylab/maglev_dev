@@ -4,6 +4,7 @@
 #include "hal.h"
 #include "biquad.h"
 #include "hall_sensors.h"
+#include "tach.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,6 +47,7 @@ extern "C" {
     
     ADCDriver* adc;
     hall_sensors_t* hall_sensors;
+    tach_t tach;
   } motor_control_t;
   
   void MotorControlInit(motor_control_t *m,

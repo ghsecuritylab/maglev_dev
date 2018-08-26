@@ -145,7 +145,7 @@ static systime_t dispatch_telemetry(comms_t* c,
 {
   (void)c;
   
-  cw_pack_map_size(pc, 7);
+  cw_pack_map_size(pc, 8);
   
   cw_pack_str(pc, "i_a", 3);
   cw_pack_float(pc, m1.i_a);
@@ -163,6 +163,9 @@ static systime_t dispatch_telemetry(comms_t* c,
   cw_pack_float(pc, m1.sin_theta);
   cw_pack_str(pc, "cos_theta", 9);
   cw_pack_float(pc, m1.cos_theta);
+  
+  cw_pack_str(pc, "tach", 4);
+  cw_pack_signed(pc, m1.tach.counter);
   
   return TIME_MS2I(20);
 }

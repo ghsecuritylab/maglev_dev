@@ -125,6 +125,7 @@ CSRC = $(ALLCSRC) \
        hall_sensors.c \
        main.c \
        motor_control.c \
+       tach.c \
        util.c
 
 #      $(CHIBIOS)/os/various/syscalls.c

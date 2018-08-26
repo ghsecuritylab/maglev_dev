@@ -82,6 +82,7 @@ void MotorControlInit(motor_control_t *m, pwmcallback_t cb) {
   
   // Initialize the hall sensors
   HallSensorsInit(m->hall_sensors);
+  TachInit(&m->tach, HallSensorsGetState(m->hall_sensors));
   
   // Initialize config
   m->config.frequency = m->clock_freq;
@@ -111,6 +112,7 @@ void MotorControlCb(motor_control_t* m,
   
   // const float theta = 0.f;
   hall_sensors_state_e hall_state = HallSensorsGetState(m->hall_sensors);
+  TachUpdate(&m->tach, hall_state);
   const float theta = HallSensorsStateToAngle(hall_state);
   const float sin_theta = sinf(theta);
   const float cos_theta = cosf(theta);
