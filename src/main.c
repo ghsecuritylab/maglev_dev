@@ -22,32 +22,19 @@
 #include "lwipthread.h"
 
 #include "comms.h"
-#include "hall_sensors.h"
 #include "motor_control.h"
 #include "93AA46AE48.h"
 
 #include "util.h"
 #include <string.h>
 
-static hall_sensors_t h1 = { .a = LINE_TIM4_CH3,
-                             .b = LINE_TIM4_CH2,
-                             .c = LINE_TIM4_CH1 };
-
 static motor_control_t m1 = { .driver = &PWMD1,
                               .clock_freq = STM32_TIMCLK2,
                               .pwm_freq = 35e3,
                               .nfault = LINE_TIM1_BKIN1,
                               .fault_clear = LINE_GPIOG_PIN1,
-                              .bridge_enabled = LINE_GPIOG_PIN0,
-                              .hall_sensors = &h1
+                              .bridge_enabled = LINE_GPIOG_PIN0
                              };
-static motor_control_t m2 = { .driver = &PWMD8,
-                              .clock_freq = STM32_TIMCLK2,
-                              .pwm_freq = 35e3,
-                              .nfault = LINE_TIM8_BKIN1,
-                              .fault_clear = LINE_GPIOF_PIN12,
-                              .bridge_enabled = LINE_GPIOF_PIN11
-                            };
 
 const float i_scale = (3.f / 4095.f) / 20.f / 0.001f;
 
@@ -56,13 +43,6 @@ static void m1_pwm_cb(PWMDriver *pwmp)  {
   MotorControlCb(&m1, ((int16_t)ADC1->JDR1) * i_scale,
                       ((int16_t)ADC1->JDR2) * i_scale);
 }
-
-static void m2_pwm_cb(PWMDriver *pwmp)  {
-  (void)pwmp;
-  MotorControlCb(&m2, ((int16_t)ADC2->JDR1) * i_scale,
-                      ((int16_t)ADC2->JDR2) * i_scale);
-}
-
 
 static const mc_93aa46ae48_t mc_93aa46ae48 = { .cs = LINE_SPI3_CS,
                                                .sck = LINE_SPI3_SCK,
@@ -77,7 +57,6 @@ static const struct lwipthread_opts _lwip_opts = { .address = IP4_ADDR_VALUE(192
 
 static void configure_motor_adcs(void) {
   rccEnableADC1(true);
-  rccEnableADC2(true);
   
   /// M1
   // Configure the ADC
@@ -89,17 +68,6 @@ static void configure_motor_adcs(void) {
   
   // Trigger one sample capture, so the first MC interrupt has data
   ADC1->CR2 |= ADC_CR2_JSWSTART;
-  
-  /// M2
-  // Configure the ADC
-  ADC2->SMPR2 = (0b010 << 9) | (0b010 << 12);
-  ADC2->JSQR = (0b01 << 20) | (8 << 10) | (9 << 15);
-  ADC2->CR1 = ADC_CR1_SCAN;
-  ADC2->CR2 = ADC_CR2_ADON | ADC_CR2_JEXTEN_1;
-  ADC2->JOFR1 = ADC1->JOFR2 = 0x7FF;
-  
-  // Trigger one sample capture, so the first MC interrupt has data
-  ADC2->CR2 |= ADC_CR2_JSWSTART;
 }
 
 static void handle_incoming_command(comms_t* c,
@@ -110,8 +78,6 @@ static void handle_incoming_command(comms_t* c,
   motor_control_t* mc = NULL;
   if(inpub_type == INPUB_CMD_M1)
     mc = &m1;
-  else if(inpub_type == INPUB_CMD_M2)
-    mc = &m2;
   else
     return;
 
@@ -145,27 +111,10 @@ static systime_t dispatch_telemetry(comms_t* c,
 {
   (void)c;
   
-  cw_pack_map_size(pc, 8);
+  cw_pack_map_size(pc, 1);
   
   cw_pack_str(pc, "i_a", 3);
   cw_pack_float(pc, m1.i_a);
-  cw_pack_str(pc, "i_b", 3);
-  cw_pack_float(pc, m1.i_b);
-  
-  cw_pack_str(pc, "i_d", 3);
-  cw_pack_float(pc, m1.i_d);
-  cw_pack_str(pc, "i_q", 3);
-  cw_pack_float(pc, m1.i_q);
-  
-  cw_pack_str(pc, "theta", 5);
-  cw_pack_float(pc, m1.theta);
-  cw_pack_str(pc, "sin_theta", 9);
-  cw_pack_float(pc, m1.sin_theta);
-  cw_pack_str(pc, "cos_theta", 9);
-  cw_pack_float(pc, m1.cos_theta);
-  
-  cw_pack_str(pc, "tach", 4);
-  cw_pack_signed(pc, m1.tach.counter);
   
   return TIME_MS2I(20);
 }
@@ -196,7 +145,6 @@ int main(void) {
   // Set up the motor controllers
   configure_motor_adcs();
   MotorControlInit(&m1, m1_pwm_cb);
-  // MotorControlInit(&m2, m2_pwm_cb);
   
   // Set up comms
   CommsInit(&_comms);
