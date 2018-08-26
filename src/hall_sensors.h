@@ -20,5 +20,7 @@ typedef enum {
 
 void HallSensorsInit(hall_sensors_t*);
 hall_sensors_state_e HallSensorsGetState(hall_sensors_t*);
-float HallSensorsGetAngle(hall_sensors_t*);
+
+int HallSensorsStateToSegment(hall_sensors_state_e);
+float HallSensorsStateToAngle(hall_sensors_state_e);
 

@@ -11,23 +11,26 @@ hall_sensors_state_e HallSensorsGetState(hall_sensors_t* hs) {
          (palReadLine(hs->c) ? 0b100 : 0b000);
 }
 
-float HallSensorsGetAngle(hall_sensors_t* hs) {
-  hall_sensors_state_e state = HallSensorsGetState(hs);
+int HallSensorsStateToSegment(hall_sensors_state_e state) {
   switch(state) {
     case HALL_SENSOR_STATE_60:
-      return 60.f * (float)(M_PI / 180.f);
+      return 1;
     case HALL_SENSOR_STATE_120:
-      return 120.f * (float)(M_PI / 180.f);
+      return 2;
     case HALL_SENSOR_STATE_180:
-      return 180.f * (float)(M_PI / 180.f);
+      return 3;
     case HALL_SENSOR_STATE_240:
-      return 240.f * (float)(M_PI / 180.f);
+      return 4;
     case HALL_SENSOR_STATE_300:
-      return 300.f * (float)(M_PI / 180.f);
+      return 5;
     case HALL_SENSOR_STATE_LOW:
     case HALL_SENSOR_STATE_HIGH:
     case HALL_SENSOR_STATE_0:
     default:
-      return 0.f * (float)(M_PI / 180.f);
+      return 0;
   }
+}
+
+float HallSensorsStateToAngle(hall_sensors_state_e state) {
+  return HallSensorsStateToSegment(state) * (float)(M_PI / 3.f);
 }

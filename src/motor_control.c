@@ -110,7 +110,8 @@ void MotorControlCb(motor_control_t* m,
   ADC1->SR = 0;
   
   // const float theta = 0.f;
-  const float theta = HallSensorsGetAngle(m->hall_sensors);
+  hall_sensors_state_e hall_state = HallSensorsGetState(m->hall_sensors);
+  const float theta = HallSensorsStateToAngle(hall_state);
   const float sin_theta = sinf(theta);
   const float cos_theta = cosf(theta);
   
